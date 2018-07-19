@@ -6,6 +6,7 @@
 package snake.game;
 
 import NeuralNet.NeuralNetwork;
+import java.util.Random;
 import snake.brain.SnakeBrain;
 
 
@@ -34,8 +35,25 @@ public class Snake {
     
     int steps = 0;
     
+    private int turnCount;
+    
     public Snake(int[] neuralSetup){
         nn = new NeuralNetwork(NeuralNetwork.ErrorFunction.LEAST_MEAN_SQUARES, NeuralNetwork.ActivationFunction.LOGISTIC_SIGMOID, neuralSetup);
+        Random rd = new Random(System.nanoTime());
+        switch(rd.nextInt(3)){
+            case 0:
+                this.setDirection(Direxion.UP);
+                break;
+            case 1:
+                this.setDirection(Direxion.DOWN);
+                break;
+            case 2:
+                this.setDirection(Direxion.LEFT);
+                break;
+            case 3:
+                this.setDirection(Direxion.RIGHT);
+        }
+        turnCount = 0;
     }
     
     
@@ -100,9 +118,10 @@ public class Snake {
     public void move(double[] input){
         Direxion newDir = brain.makeMove(input, nn);
         
-        if(newDir != oppoDir) 
+        if(newDir != oppoDir){ 
             this.setDirection(newDir)
-        else 
+            turnCount++;      
+        }else 
             this.setDirection(dir);
         
         for(int i = this.length; i > 0; i--){
@@ -132,6 +151,10 @@ public class Snake {
     
     public int getSteps(){
         return steps;
+    }
+    
+    public int getTurnCount(){
+        return turnCount;
     }
     
     public void setFitness(double fit){
