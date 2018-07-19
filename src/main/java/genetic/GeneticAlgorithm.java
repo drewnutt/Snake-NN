@@ -14,11 +14,14 @@ import snake.listeners.GameOverListener;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.ItemEvent;
+import java.awt.event.ItemListener;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.FutureTask;
 import javax.swing.JButton;
+import javax.swing.JComboBox;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 
@@ -49,27 +52,8 @@ public class GeneticAlgorithm extends JFrame implements GameOverListener{
         popSize = population;
         champs = numChampions;
         generation = 0;
-        JFrame info = new JFrame();
-        JPanel infoPanel = new JPanel();
-        infoPanel.setLayout(new GridLayout(3,1));
-        gen = new JLabel("Generation: " + generation);
-        infoPanel.add(gen);
-        bestFit = new JLabel("Best Fitness: " + 0);
-        infoPanel.add(bestFit);
-        avg = new JLabel("Avg Fitness: " + 0);
-        JButton stop = new JButton("Stop Genetic Algorithm");
-        stop.addActionListener(new ActionListener(){
-            @Override
-            public void actionPerformed(ActionEvent ae){
-                continueBreeding = false;
-            }
-        });
-        infoPanel.add(stop);
-        info.add(infoPanel);
-        info.setVisible(true);
-        info.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        info.pack();
-        snakeBoard = new Board(ARCHITECTURE);
+        
+        snakeBoard = new Board(ARCHITECTURE, 0);
         snakeBoard.addListeners(this);
         this.add(snakeBoard);
         setResizable(false);
@@ -108,6 +92,44 @@ public class GeneticAlgorithm extends JFrame implements GameOverListener{
         }
     }
     
+    private void setupInfoPanel(){
+        JFrame info = new JFrame();
+        JPanel infoPanel = new JPanel();
+
+        gen = new JLabel("Generation: " + generation);
+
+        bestFit = new JLabel("Best Fitness: " + 0);
+        
+        avg = new JLabel("Avg Fitness: " + 0);
+        
+        JButton stop = new JButton("Stop Genetic Algorithm");
+        stop.addActionListener(new ActionListener(){
+            @Override
+            public void actionPerformed(ActionEvent ae){
+                continueBreeding = false;
+            }
+        });
+        
+        JComboBox fitChoice = new JComboBox(new String[]{"Survival Time", "Score"});
+        fitChoice.addItemListener(new ItemListener(){
+            @Override
+            public void itemStateChanged(ItemEvent ie){
+                snakeBoard = new Board(ARCHITECTURE, fitChoice.getSelectedIndex());
+            }
+        });
+        
+        infoPanel.setLayout(new GridLayout(3,1));
+        infoPanel.add(gen);
+        infoPanel.add(bestFit);
+        infoPanel.add(avg);
+        infoPanel.add(fitChoice);
+        infoPanel.add(stop);
+        info.add(infoPanel);
+        info.setVisible(true);
+        info.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        info.pack();
+    }
+    
     void addGeneration(){
         generation++;
     }
@@ -126,6 +148,7 @@ public class GeneticAlgorithm extends JFrame implements GameOverListener{
     int[] testFitness(){
         double max[] = new double[this.champs];
         int topSnakes[] = new int[this.champs];
+        double sum = 0;
         for(int i = 0; i < population.length; i++){
             readyForNext = false;
             snakeBoard.initializeGame(population[i]);
@@ -150,10 +173,10 @@ public class GeneticAlgorithm extends JFrame implements GameOverListener{
                 }    
             }
             population[i].setFitness(fitness + 1);
+            sum += fitness;
         }
         bestFit.setText("Best Fitness: " +  max[0]);
-        for(double m: max)
-            System.out.println(m);
+        avg.setText("Avg Fitness: " + (sum / population.length));
         return topSnakes;
     }
     
