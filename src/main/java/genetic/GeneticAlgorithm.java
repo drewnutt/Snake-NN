@@ -30,6 +30,7 @@ public class GeneticAlgorithm extends JFrame implements GameOverListener{
     static final int[] ARCHITECTURE = {5,5,4};
     double MR;
     int popSize;
+    int champs;
     SnakeBrain[] population;
     int generation;
     Board snakeBoard;
@@ -43,9 +44,10 @@ public class GeneticAlgorithm extends JFrame implements GameOverListener{
     
     ArrayList<Integer> breedingPool = new ArrayList<>();
     
-    GeneticAlgorithm(double mutRate, int population){
+    GeneticAlgorithm(double mutRate, int population, int numChampions){
         MR = mutRate;
         popSize = population;
+        champs = numChampions;
         generation = 0;
         JFrame info = new JFrame();
         JPanel infoPanel = new JPanel();
@@ -83,27 +85,22 @@ public class GeneticAlgorithm extends JFrame implements GameOverListener{
     }
     
     public static void main(String[] args){
-        GeneticAlgorithm ga = new GeneticAlgorithm(0.001, 50);
+        GeneticAlgorithm ga = new GeneticAlgorithm(0.001, 50, 2);
         ga.setVisible(true);
         
         ga.initializePop();
         System.out.println("Initialized");
-        double best = ga.testFitness();
+        int[] best = ga.testFitness();
         System.out.println("Fitness Tested");
         
         while(ga.continueBreeding){
-            if(best == 0){
-                ga.initializePop();
-                ga.generation = 0;
-                System.out.println("Bad Population, restarted with new population");
-            }else{
-                if(!ga.makeBreedingPool(best))
-                    break;
-                System.out.println("Breeding Pool made");
-                ga.breed();
-                System.out.println("New Population Bred");
-                ga.addGeneration();
-            }
+            if(!ga.makeBreedingPool(best[0]))
+                break;
+            System.out.println("Breeding Pool made");
+            
+            ga.breed(best);
+            System.out.println("New Population Bred");
+            ga.addGeneration();
             ga.gen.setText("Generation: " + ga.getGeneration());
             best = ga.testFitness();
             System.out.println("Fitness Tested");
@@ -126,9 +123,9 @@ public class GeneticAlgorithm extends JFrame implements GameOverListener{
         }
     }
     
-    double testFitness(){
-        double max = 0;
-        int snake = 0;
+    int[] testFitness(){
+        double max[] = new double[this.champs];
+        int topSnakes[] = new int[this.champs];
         for(int i = 0; i < population.length; i++){
             readyForNext = false;
             snakeBoard.initializeGame(population[i]);
@@ -141,19 +138,28 @@ public class GeneticAlgorithm extends JFrame implements GameOverListener{
             }catch(InterruptedException | ExecutionException e){
                 e.printStackTrace();
             }
-            if(fitness >= max){
-                max = fitness;
-                snake = i;
+            for(int j = 0; j < this.champs; j++){
+                if(fitness >= max[j]){
+                    for(int k = this.champs - 2; k > j; k--){
+                        max[k] = max[k + 1];
+                        topSnakes[k - 1] = topSnakes[k];
+                    }  
+                    max[j] = fitness;
+                    topSnakes[j] = i;
+                    break;
+                }    
             }
             population[i].setFitness(fitness + 1);
         }
-        bestFit.setText("Best Fitness: " +  max);
-        return max;
+        bestFit.setText("Best Fitness: " +  max[0]);
+        for(double m: max)
+            System.out.println(m);
+        return topSnakes;
     }
     
-    boolean makeBreedingPool(double max){
+    boolean makeBreedingPool(int max){
         breedingPool.clear();
-        double maxFitness = max;
+        double maxFitness = population[max].getFitness();
         for (int i = 0; i < population.length; i++) {
       
             double actualFit = population[i].getFitness() > 0 && population[i].getFitness() / maxFitness > 0.5? population[i].getFitness() : 0;
@@ -168,17 +174,24 @@ public class GeneticAlgorithm extends JFrame implements GameOverListener{
         return true;
     }
     
-    void breed(){
+    void breed(int[] champs){
+        SnakeBrain[] newGen = new SnakeBrain[population.length];
+        for(int i = 0; i < this.champs; i++){
+            newGen[i] = population[champs[i]];
+        }
+        
         Random rd = new Random(System.nanoTime());
-        for(int i = 0; i < population.length; i++){
+        for(int i = this.champs; i < population.length; i++){
             int a = rd.nextInt(breedingPool.size());
             int b = rd.nextInt(breedingPool.size());
             SnakeBrain daddy = population[breedingPool.get(a)];
             SnakeBrain mommy = population[breedingPool.get(b)];
             SnakeBrain baby = (daddy.mate(mommy));
             baby.mutate(MR);
-            population[i] = baby;
+            newGen[i] = baby;
         }
+        
+        population = newGen;
     }
     
     double mapValue(double initial, double initMin, double initMax, double finMin, double finMax){
