@@ -92,12 +92,18 @@ public class GeneticAlgorithm extends JFrame implements GameOverListener{
         System.out.println("Fitness Tested");
         
         while(ga.continueBreeding){
-            if(!ga.makeBreedingPool(best))
-                break;
-            System.out.println("Breeding Pool made");
-            ga.breed();
-            System.out.println("New Population Bred");
-            ga.addGeneration();
+            if(best == 0){
+                ga.initializePop();
+                ga.generation = 0;
+                System.out.println("Bad Population, restarted with new population");
+            }else{
+                if(!ga.makeBreedingPool(best))
+                    break;
+                System.out.println("Breeding Pool made");
+                ga.breed();
+                System.out.println("New Population Bred");
+                ga.addGeneration();
+            }
             ga.gen.setText("Generation: " + ga.getGeneration());
             best = ga.testFitness();
             System.out.println("Fitness Tested");
