@@ -61,19 +61,17 @@ public class Board extends JPanel implements ActionListener, Callable<Double>{
     private Food food;
     
     private boolean snakeStalled = false;
-    
+    int[] neuralSetup;
     /**
      * Creates new form Board
      * @param neuralSetup
      */
     public Board(int[] neuralSetup) {
-        
+        this.neuralSetup = neuralSetup;
         setBackground(Color.BLACK);
         setFocusable(true);
         
         setPreferredSize(new Dimension(MAXWIDTH, MAXHEIGHT));
-        
-        snake = new Snake(neuralSetup);
     }
     
     @Override
@@ -112,6 +110,7 @@ public class Board extends JPanel implements ActionListener, Callable<Double>{
     
     public void initializeGame(SnakeBrain newBrain){
         food = new Food();
+        snake = new Snake(neuralSetup);
         gs = GameState.RUNNING;
         
         snake.setJoints(3);
@@ -122,8 +121,6 @@ public class Board extends JPanel implements ActionListener, Callable<Double>{
             snake.setSnakeX(MAXWIDTH/2);
             snake.setSnakeY(MAXHEIGHT/2);
         }
-        
-        snake.setDirection(Snake.Direxion.RIGHT);
         
         score = 0;
         fitness = 0;
@@ -174,13 +171,13 @@ public class Board extends JPanel implements ActionListener, Callable<Double>{
             checkCollisions();
             
             snake.move(getNNInputs());
-            int maxSteps =  (score + 1 ) * 50;
-            int steps = snake.getSteps() - stepsFood;
-            if(steps >= maxSteps){
-                gs = GameState.GAME_OVER;
-                snakeStalled = true;
-                tick.stop();
-            }
+//            int maxSteps =  (score + 1 ) * 50;
+//            int steps = snake.getSteps() - stepsFood;
+//            if(steps >= maxSteps){
+//                gs = GameState.GAME_OVER;
+//                snakeStalled = true;
+//                tick.stop();
+//            }
             double newFoodDist = getDistance(snake.getXPos(0),snake.getYPos(0), food.getFoodX(), food.getFoodY());
             if(newFoodDist < distToFood)
                 fitness += 1;
@@ -239,9 +236,9 @@ public class Board extends JPanel implements ActionListener, Callable<Double>{
     
     private void calculateFitness(){
         if(snakeStalled)
-            fit = score * 1000 + fitness;
+            fit = score * 1000 + fitness + 10 * snake.getTurnCount();
         else
-            fit = score * 1000 + fitness;
+            fit = score * 1000 + fitness + 1.5 * snake.getTurnCount();
     }
     
     public double[] getNNInputs(){
