@@ -62,11 +62,12 @@ public class Board extends JPanel implements ActionListener, Callable<Double>{
     
     private boolean snakeStalled = false;
     int[] neuralSetup;
+    private int careAbout;
     /**
      * Creates new form Board
      * @param neuralSetup
      */
-    public Board(int[] neuralSetup) {
+    public Board(int[] neuralSetup, int careAbout) {
         this.neuralSetup = neuralSetup;
         setBackground(Color.BLACK);
         setFocusable(true);
@@ -236,9 +237,9 @@ public class Board extends JPanel implements ActionListener, Callable<Double>{
     
     private void calculateFitness(){
         if(snakeStalled)
-            fit = score * 1000 + fitness + 10 * snake.getTurnCount();
+            fit = careAbout * (score * 1000 + fitness) + (1 - careAbout) * (1.5 * snake.getTurnCount() + snake.getSteps());
         else
-            fit = score * 1000 + fitness + 1.5 * snake.getTurnCount();
+            fit = careAbout * (score * 1000 + fitness) + (1 - careAbout) * (1.5 * snake.getTurnCount() + snake.getSteps());
     }
     
     public double[] getNNInputs(){
