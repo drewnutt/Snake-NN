@@ -125,8 +125,6 @@ public class Board extends JPanel implements ActionListener, Callable<Double>{
         
         snake.setDirection(Snake.Direxion.RIGHT);
         
-        food.createFood();
-        
         score = 0;
         fitness = 0;
         distToFood = getDistance(snake.getXPos(0),snake.getYPos(0), food.getFoodX(), food.getFoodY());
@@ -212,7 +210,7 @@ public class Board extends JPanel implements ActionListener, Callable<Double>{
         Checking snake collision with self
         */
         for(int i = snake.getJoints(); i > 0; i--){
-            if(snake.getXPos(0) == snake.getXPos(i) && snake.getYPos(0) == snake.getYPos(i)){
+            if((i > 5) && snake.getXPos(0) == snake.getXPos(i) && snake.getYPos(0) == snake.getYPos(i)){
                 gs = GameState.GAME_OVER;
             }
         }

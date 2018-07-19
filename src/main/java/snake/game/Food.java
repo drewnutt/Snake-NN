@@ -16,6 +16,7 @@ public class Food {
     
     private int xloc;
     private int yloc;
+    
     Food(){
         Random randgen = new Random(System.nanoTime());
         int x = randgen.nextDouble() > 0.5 ? 1 : 0;
