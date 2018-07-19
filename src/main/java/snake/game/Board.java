@@ -212,7 +212,7 @@ public class Board extends JPanel implements ActionListener, Callable<Double>{
         Checking snake collision with self
         */
         for(int i = snake.getJoints(); i > 0; i--){
-            if((i > 5) && snake.getXPos(0) == snake.getXPos(i) && snake.getYPos(0) == snake.getYPos(i)){
+            if(snake.getXPos(0) == snake.getXPos(i) && snake.getYPos(0) == snake.getYPos(i)){
                 gs = GameState.GAME_OVER;
             }
         }
@@ -251,7 +251,7 @@ public class Board extends JPanel implements ActionListener, Callable<Double>{
         for(int i = 0; i < 4; i++){
             inputs[i] = getDistance(i);
         }
-        inputs[4] = getAngle(new int[]{snake.getXPos(0), snake.getYPos(0)}, new int[]{food.getFoodX(), food.getFoodY()});
+        inputs[4] = getAngle(new int[]{snake.getXPos(0), snake.getYPos(0)}, new int[]{food.getFoodX(), food.getFoodY()}, snake.getDirection());
         
 //        for(double i: inputs)
 //            System.out.printf("%f, ", i);
@@ -272,15 +272,41 @@ public class Board extends JPanel implements ActionListener, Callable<Double>{
         return (p1 - q1) * (p1 - q1) + (p2 - q2) * (p2 - q2);
     }
     
-    double getAngle(int[] p1, int[] p2){
+    double getAngle(int[] p1, int[] p2, Snake.Direxion dir){
         if(p1.length != p2.length && p1.length != 2){
             System.out.println("Problem with getAngle in Board");
             return 0;
         }
-        int xdist = Math.abs(p1[0] - p2[0]);
-        int ydist = Math.abs(p1[1] - p2[1]);
+        double angle;
+        int[] vert = {p2[0], p1[1]};
+
+        double opp = Math.sqrt(getDistance(vert[0],vert[1],p2[0],p2[1]));
+        double adj = Math.sqrt(getDistance(vert[0],vert[1],p1[0],p1[1]));
+        angle = Math.atan(opp / adj) / Math.PI;
         
-        return Math.atan2(xdist, ydist) / Math.PI;
+        switch(dir){
+            case UP:
+                angle *= p1[0] - p2[0] > 0? -1 : 1;
+                angle += p1[1] - p2[1] < 0? (angle < 0? -0.5 : 0.5 ): 0;
+                angle = p1[0] == p2[0]? 0 : angle;
+                break;
+            case DOWN:
+                angle *= p1[0] - p2[0] < 0? -1 : 1;
+                angle += p1[1] - p2[1] > 0? (angle < 0? -0.5 : 0.5 ): 0;
+                angle = p1[0] == p2[0]? 0 : angle;
+                break;
+            case LEFT:
+                angle *= p1[1] - p2[1] < 0? -1 : 1;
+                angle += p1[0] - p2[0] < 0? (angle < 0? -0.5 : 0.5 ): 0;
+                angle = p1[1] == p2[1]? 0 : angle;
+                break;
+            case RIGHT:
+                angle *= p1[1] - p2[1] > 0? -1 : 1;
+                angle += p1[0] - p2[0] > 0? (angle < 0? -0.5 : 0.5 ) : 0;
+                angle = p1[1] == p2[1]? 0 : angle;
+                break;
+        }
+        return angle;
     }
     
     double getDistance(int direction){
