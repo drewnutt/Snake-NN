@@ -41,7 +41,7 @@ public class GeneticAlgorithm extends JFrame implements GameOverListener{
     
     ExecutorService executor = Executors.newFixedThreadPool(1);
     
-    ArrayList<SnakeBrain> breedingPool = new ArrayList<>();
+    ArrayList<Integer> breedingPool = new ArrayList<>();
     
     GeneticAlgorithm(double mutRate, int population){
         MR = mutRate;
@@ -155,7 +155,7 @@ public class GeneticAlgorithm extends JFrame implements GameOverListener{
                 
             int n = (int)(fitness * 100);
             for (int j = 0; j < n; j++) {              // and pick two random numbers
-                    breedingPool.add(population[i]);
+                    breedingPool.add(i);
             }
         }
         
@@ -167,8 +167,8 @@ public class GeneticAlgorithm extends JFrame implements GameOverListener{
         for(int i = 0; i < population.length; i++){
             int a = rd.nextInt(breedingPool.size());
             int b = rd.nextInt(breedingPool.size());
-            SnakeBrain daddy = breedingPool.get(a);
-            SnakeBrain mommy = breedingPool.get(b);
+            SnakeBrain daddy = population[breedingPool.get(a)];
+            SnakeBrain mommy = population[breedingPool.get(b)];
             SnakeBrain baby = (daddy.mate(mommy));
             baby.mutate(MR);
             population[i] = baby;
