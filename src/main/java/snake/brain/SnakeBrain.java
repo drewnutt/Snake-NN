@@ -91,11 +91,19 @@ public class SnakeBrain {
     public SnakeBrain mate(SnakeBrain parent2){
         SnakeBrain baby = new SnakeBrain(ARCH);
         Random rd = new Random(System.nanoTime());
-        for(int i = 1; i < ARCH.length - 1; i++){
-            if(rd.nextDouble() >= 0.5)
-                baby.setWeight(i, this.getWeight(i));
-            else
-                baby.setWeight(i, parent2.getWeight(i));
+        for(int i = 0; i < ARCH.length - 1; i++){
+            int firstDim = this.dimensions[i][0];
+            int secondDim = this.dimensions[i][1];
+            double[][] temp = new double[this.dimensions[i][0]][this.dimensions[i][1]];
+            for(int j = 0; j < firstDim; j++){
+                for(int k = 0; k < secondDim; k++){
+                    if(rd.nextDouble() >= 0.5)
+                        temp[j][k] = this.getWeight(i)[j][k];
+                    else
+                        temp[j][k] = parent2.getWeight(i)[j][k];
+                }
+            }
+            
         }
         
         return baby;
