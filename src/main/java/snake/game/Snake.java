@@ -26,6 +26,8 @@ public class Snake {
     
     private Direxion dir;
     
+    private Direxion oppoDir;
+    
     private final int[] xloc = new int[Board.getTotalPixels()];
     
     private final int[] yloc = new int[Board.getTotalPixels()];
@@ -71,6 +73,20 @@ public class Snake {
     
     public void setDirection(Direxion newdir){
         dir = newdir;
+        switch(dir){
+            case UP:
+                oppoDir = Direxion.DOWN;
+                break;
+            case DOWN:
+                oppoDir = Direxion.UP;
+                break;
+            case LEFT:
+                oppoDir = Direxion.RIGHT;
+                break;
+            case RIGHT:
+                oppoDir = Direxion.LEFT;
+                break;
+        }
     }
     
     public Direxion getDirection(){
@@ -82,7 +98,13 @@ public class Snake {
     }
     
     public void move(double[] input){
-        dir = brain.makeMove(input, nn);
+        Direxion newDir = brain.makeMove(input, nn);
+        
+        if(newDir != oppoDir) 
+            this.setDirection(newDir)
+        else 
+            this.setDirection(dir);
+        
         for(int i = this.length; i > 0; i--){
             xloc[i] = xloc[i - 1];
             yloc[i] = yloc[i - 1];
